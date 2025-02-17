@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator with Location Tracking and Download</title>
+    <script src="https://unpkg.com/qr-code-styling@latest/lib/qr-code-styling.js"></script>
+</head>
+<body>
+    <h1>QR Code Generator with Location Tracking and Download</h1>
+    <input type="text" id="url" placeholder="Enter URL">
+    <button onclick="generateQRCode()">Generate QR Code</button>
+    <div id="qr-code"></div>
+    <button id="downloadBtn" style="display: none;" onclick="downloadQRCode()">Download QR Code</button>
+
+    <script>
+        const qrCode = new QRCodeStyling({
+            width: 300,
+            height: 300,
+            dotsOptions: {
+                color: "#000000",
+                type: "rounded"
+            },
+            backgroundOptions: {
+                color: "#ffffff",
+            }
+        });
+
+        function generateQRCode() {
+            const url = document.getElementById("url").value;
+            qrCode.update({
+                data: url
+            });
+            qrCode.append(document.getElementById("qr-code"));
+            document.getElementById("downloadBtn").style.display = "block";
+        }
+
+        function sendLocationToServer(latitude, longitude) {
+            fetch('http://localhost:3000/location', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ latitude, longitude })
+            })
+            .then(response => response.json())
+            .then(data => console.log('Location sent to server:', data))
+            .catch(error => console.error('Error:', error));
+        }
+
+        function downloadQRCode() {
+            qrCode.download({ name: "qrcode", extension: "png" });
+        }
+
+        // Add this script to your webpage that the QR code redirects to
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                sendLocationToServer(latitude, longitude);
+            }, (error) => {
+                console.error('Error getting location:', error);
+            });
+        }
+    </script>
+</body>
+</html>
