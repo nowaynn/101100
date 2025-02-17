@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator with Editable Link and Download</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        input, button { margin: 10px; }
+    </style>
+</head>
+<body>
+    <h1>QR Code Generator with Editable Link and Download</h1>
+    <input type="text" id="url" placeholder="Enter URL" value="https://example.com">
+    <button onclick="generateQRCode()">Generate QR Code</button>
+    <div id="qr-code"></div>
+    <button id="downloadBtn" style="display: none;" onclick="downloadQRCode()">Download QR Code</button>
+
+    <script>
+        let qrCodeCanvas;
+
+        function generateQRCode() {
+            const url = document.getElementById("url").value;
+            QRCode.toCanvas(document.getElementById('qr-code'), url, { errorCorrectionLevel: 'H' }, function (error) {
+                if (error) console.error(error);
+                document.getElementById("downloadBtn").style.display = "block";
+            });
+        }
+
+        function downloadQRCode() {
+            qrCodeCanvas = document.getElementById('qr-code').querySelector('canvas');
+            const link = document.createElement('a');
+            link.href = qrCodeCanvas.toDataURL();
+            link.download = 'qrcode.png';
+            link.click();
+        }
+    </script>
+</body>
+</html>
