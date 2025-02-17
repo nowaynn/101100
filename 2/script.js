@@ -122,3 +122,36 @@ function generateQr(v) {
         download[1].onclick = () => qr.download({ name: "qr-code", extension: "jpg" });
     }
 }
+
+// script.js
+const generateBtn = document.getElementById('generate-btn');
+const saveBtn = document.getElementById('save-btn');
+const qrCodeDiv = document.getElementById('qr-code');
+
+generateBtn.addEventListener('click', () => {
+  const qrText = document.getElementById('qr-text').value;
+  if (!qrText) {
+    alert('Please enter some text or URL');
+    return;
+  }
+  // Clear previous QR Code
+  qrCodeDiv.innerHTML = '';
+  // Generate new QR Code
+  new QRCode(qrCodeDiv, {
+    text: qrText,
+    width: 256,
+    height: 256,
+  });
+});
+
+saveBtn.addEventListener('click', () => {
+  const img = qrCodeDiv.querySelector('img');
+  if (img) {
+    const link = document.createElement('a');
+    link.href = img.src;
+    link.download = 'qrcode.png';
+    link.click();
+  } else {
+    alert('Please generate a QR code first');
+  }
+});
