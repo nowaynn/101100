@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Generator with Editable Link, Storage, and Download</title>
+    <title>QR Code Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
         input, button { margin: 10px; }
         #qr-code canvas { border: 1px solid #000; }
         .link-container { margin-top: 20px; }
-        .link-item { margin: 10px 0; }
+        .link-item { margin: 10px 0; display: flex; align-items: center; }
+        .link-item input { margin-right: 10px; }
+        .link-item img { margin-left: 10px; border: 1px solid #000; }
     </style>
 </head>
 <body>
-    <h1>QR Code Generator with Editable Link, Storage, and Download</h1>
+    <h1>QR Code Generator with Editable Link, Storage, Display, and Download</h1>
     <input type="text" id="url" placeholder="Enter URL" value="https://example.com">
     <button onclick="generateQRCode()">Generate QR Code</button>
     <div id="qr-code"></div>
@@ -33,7 +35,7 @@
                 qrCodeCanvas = canvas;
 
                 // Store and display the link
-                storeLink(url);
+                storeLink(url, canvas.toDataURL());
                 displayLinks();
             });
         }
@@ -45,11 +47,9 @@
             link.click();
         }
 
-        function storeLink(url) {
-            if (!links.includes(url)) {
-                links.push(url);
-                localStorage.setItem('links', JSON.stringify(links));
-            }
+        function storeLink(url, dataUrl) {
+            links.push({ url, dataUrl });
+            localStorage.setItem('links', JSON.stringify(links));
         }
 
         function displayLinks() {
@@ -58,14 +58,22 @@
             links.forEach((link, index) => {
                 const linkItem = document.createElement('div');
                 linkItem.className = 'link-item';
+
                 const input = document.createElement('input');
                 input.type = 'text';
-                input.value = link;
+                input.value = link.url;
                 input.onchange = function () {
-                    links[index] = input.value;
+                    links[index].url = input.value;
                     localStorage.setItem('links', JSON.stringify(links));
                 };
+
+                const img = document.createElement('img');
+                img.src = link.dataUrl;
+                img.width = 50;
+                img.height = 50;
+
                 linkItem.appendChild(input);
+                linkItem.appendChild(img);
                 container.appendChild(linkItem);
             });
         }
