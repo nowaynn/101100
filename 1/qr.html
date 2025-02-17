@@ -3,38 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Generator with Editable Link and Download</title>
+    <title>QR Code Generator with Editable Link, Storage, and Download</title>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
         input, button { margin: 10px; }
+        #qr-code canvas { border: 1px solid #000; }
+        .link-container { margin-top: 20px; }
+        .link-item { margin: 10px 0; }
     </style>
 </head>
 <body>
-    <h1>QR Code Generator with Editable Link and Download</h1>
+    <h1>QR Code Generator with Editable Link, Storage, and Download</h1>
     <input type="text" id="url" placeholder="Enter URL" value="https://example.com">
     <button onclick="generateQRCode()">Generate QR Code</button>
     <div id="qr-code"></div>
     <button id="downloadBtn" style="display: none;" onclick="downloadQRCode()">Download QR Code</button>
+    <div id="link-container" class="link-container"></div>
 
     <script>
         let qrCodeCanvas;
+        let links = [];
 
         function generateQRCode() {
             const url = document.getElementById("url").value;
-            QRCode.toCanvas(document.getElementById('qr-code'), url, { errorCorrectionLevel: 'H' }, function (error) {
+            QRCode.toCanvas(document.getElementById('qr-code'), url, { errorCorrectionLevel: 'H' }, function (error, canvas) {
                 if (error) console.error(error);
                 document.getElementById("downloadBtn").style.display = "block";
+                qrCodeCanvas = canvas;
+
+                // Store and display the link
+                storeLink(url);
+                displayLinks();
             });
         }
 
         function downloadQRCode() {
-            qrCodeCanvas = document.getElementById('qr-code').querySelector('canvas');
             const link = document.createElement('a');
             link.href = qrCodeCanvas.toDataURL();
             link.download = 'qrcode.png';
             link.click();
         }
+
+        function storeLink(url) {
+            if (!links.includes(url)) {
+                links.push(url);
+                localStorage.setItem('links', JSON.stringify(links));
+            }
+        }
+
+        function displayLinks() {
+            const container = document.getElementById('link-container');
+            container.innerHTML = '';
+            links.forEach((link, index) => {
+                const linkItem = document.createElement('div');
+                linkItem.className = 'link-item';
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = link;
+                input.onchange = function () {
+                    links[index] = input.value;
+                    localStorage.setItem('links', JSON.stringify(links));
+                };
+                linkItem.appendChild(input);
+                container.appendChild(linkItem);
+            });
+        }
+
+        window.onload = function() {
+            if (localStorage.getItem('links')) {
+                links = JSON.parse(localStorage.getItem('links'));
+                displayLinks();
+            }
+        };
     </script>
 </body>
 </html>
