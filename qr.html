@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Generator with Location</title>
+    <title>QR Code Generator with Location Tracking</title>
+    <script src="https://unpkg.com/qr-code-styling@latest/lib/qr-code-styling.js"></script>
 </head>
 <body>
-    <h1>QR Code Generator with Location</h1>
+    <h1>QR Code Generator with Location Tracking</h1>
     <input type="text" id="url" placeholder="Enter URL">
     <button onclick="generateQRCode()">Generate QR Code</button>
     <div id="qr-code"></div>
-    <p id="location"></p>
 
-    <script src="https://unpkg.com/qr-code-styling@latest/lib/qr-code-styling.js"></script>
     <script>
         const qrCode = new QRCodeStyling({
             width: 300,
@@ -28,39 +27,34 @@
 
         function generateQRCode() {
             const url = document.getElementById("url").value;
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
-                    const location = `Latitude: ${latitude}, Longitude: ${longitude}`;
-                    document.getElementById("location").textContent = location;
-
-                    const fullUrl = `${url}?lat=${latitude}&lon=${longitude}`;
-                    qrCode.update({
-                        data: fullUrl
-                    });
-                    qrCode.append(document.getElementById("qr-code"));
-                }, showError);
-            } else {
-                document.getElementById("location").textContent = "Geolocation is not supported by this browser.";
-            }
+            qrCode.update({
+                data: url
+            });
+            qrCode.append(document.getElementById("qr-code"));
         }
 
-        function showError(error) {
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    document.getElementById("location").textContent = "User denied the request for Geolocation.";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    document.getElementById("location").textContent = "Location information is unavailable.";
-                    break;
-                case error.TIMEOUT:
-                    document.getElementById("location").textContent = "The request to get user location timed out.";
-                    break;
-                case error.UNKNOWN_ERROR:
-                    document.getElementById("location").textContent = "An unknown error occurred.";
-                    break;
-            }
+        function sendLocationToServer(latitude, longitude) {
+            fetch('YOUR_BACKEND_ENDPOINT', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ latitude, longitude })
+            })
+            .then(response => response.json())
+            .then(data => console.log('Location sent to server:', data))
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Get user location when QR code is scanned
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                sendLocationToServer(latitude, longitude);
+            }, (error) => {
+                console.error('Error getting location:', error);
+            });
         }
     </script>
 </body>
